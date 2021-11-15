@@ -58,7 +58,7 @@ const About = () => {
       So we decided to build something that can help us type out our writing. Being experienced in Python and wanting to learn Image Processing, this was the perfect project, so we got started!
       </div>
       <br /><br />
-      <h2>Want to Contribute?</h2>
+      {/* <h2>Want to Contribute?</h2>
       <div><br />We &#9829; open-source! <br /> We look forward to your contributions! Don’t shy away if you are a beginner, we are happy to help you get started. <br /><br />
       <div className="about-list"><ul>
       The following repositories help handwrite work: <br/><br/>
@@ -67,7 +67,7 @@ const About = () => {
         <li><a href="https://github.com/cod-ed/handwrite-server">Handwrite Server:</a> Backend for handwrite, hosted on heroku. (Python, Flask)</li><br />
       </ul>
       </div>
-      </div>
+      </div> */}
     </div>
   );
 }

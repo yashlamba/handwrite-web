@@ -19,7 +19,7 @@ const Navbar = () => {
                         <button>How To Use?</button>
                     </a>
                 </div>
-                <div>
+                {/* <div>
                     <a
                         href="https://cod-ed.github.io/handwrite"
                         target="_blank"
@@ -27,7 +27,7 @@ const Navbar = () => {
                     >
                         <button>Documentation</button>
                     </a>
-                </div>
+                </div> */}
             </div>
         </div>
     );

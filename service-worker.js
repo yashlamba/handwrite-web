@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "https://cod-ed.github.io/handwrite-web/precache-manifest.5dc8f8a396fa9e5a24b9949a574d206e.js"
+  "https://yashlamba.com/handwrite-web/precache-manifest.ca764e4bcf1d4c62e031036a7858db32.js"
 );
 
 workbox.clientsClaim();
@@ -28,7 +28,7 @@ self.__precacheManifest = [].concat(self.__precacheManifest || []);
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
-workbox.routing.registerNavigationRoute("https://cod-ed.github.io/handwrite-web/index.html", {
+workbox.routing.registerNavigationRoute("https://yashlamba.com/handwrite-web/index.html", {
   
   blacklist: [/^\/_/,/\/[^/]+\.[^/]+$/],
 });

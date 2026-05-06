@@ -21,7 +21,6 @@
     "scripts": {
         "predeploy": "npm run build",
         "deploy": "gh-pages -d dist",
-        "deploydev": "gh-pages -d dist -e dev",
         "start": "vite",
         "dev": "vite",
         "build": "vite build",

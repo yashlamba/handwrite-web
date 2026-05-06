@@ -15,7 +15,7 @@ const HowToUse = () => {
           <h2>Creating your Handwritten Sample</h2>
           <br />
           <ol type="1">
-            <li> Take a printout of the <a href='https://github.com/yashlamba/handwrite/raw/dev/handwrite_sample.pdf'>sample form</a>.</li> <br />
+            <li> Take a printout of the <a href='https://github.com/yashlamba/handwrite/raw/main/handwrite_sample.pdf'>sample form</a>.</li> <br />
             <li> Fill the form using the reference image.</li> <br />
             <li> Scan the filled form using a scanner, or any scanning application on your phone.</li> <br />
             <li> Save the scan in JPEG format.</li> <br />

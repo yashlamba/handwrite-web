@@ -190,7 +190,7 @@ function Home(props) {
                 </IconButton></h6></center> : ""}
             </div>
             <div className="submit-button">
-              <Button variant="outlined" href="https://github.com/yashlamba/handwrite/raw/dev/handwrite_sample.pdf">Download Sample Form</Button><br /><br />
+              <Button variant="outlined" href="https://github.com/yashlamba/handwrite/raw/main/handwrite_sample.pdf">Download Sample Form</Button><br /><br />
               <Button type="submit" variant="outlined" disabled={loading() || currentState === 0}>
                 CREATE FONT
               </Button>

@@ -21,7 +21,7 @@ const Navbar = () => {
                 </div>
                 <div>
                     <a
-                        href="https://builtree.github.io/handwrite"
+                        href="https://yashlamba.github.io/handwrite"
                         target="_blank"
                         rel="noopener noreferrer"
                     >

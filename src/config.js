@@ -1,14 +1,5 @@
-var API_URL;
-if(process.env.REACT_APP_STAGE === 'development') {
-    API_URL = 'https://handwritetest.herokuapp.com'
-}
-  
-else if(process.env.REACT_APP_STAGE === 'production') {
-    API_URL = 'https://handwrite-server.herokuapp.com'
-}
+const cleanUrl = (url) => url.replace(/\/+$/, '');
 
-else {
-    API_URL = 'http://localhost:8000'
-}
+const configuredApiUrl = import.meta.env.VITE_HANDWRITE_API_URL;
 
-export const API = API_URL;
+export const API = configuredApiUrl ? cleanUrl(configuredApiUrl) : '';

@@ -26,10 +26,11 @@ function Home(props) {
   function validateImage(image) {
     var allowedTypes = ['jpeg', 'jpg', 'png'];
     var message = '';
+    var fileType = image.type && image.type.split("/")[1];
     if (image.size / 1024 / 1024 > 2) {
       message += 'File size exceeds 2 MiB! ';
     }
-    if (!allowedTypes.includes(image.type.split("/")[1])) {
+    if (!allowedTypes.includes(fileType)) {
       message += 'File type not supported! Allowed file extensions - ' + allowedTypes.join(", ");
     }
     if (message){
@@ -49,7 +50,6 @@ function Home(props) {
     noKeyboard: true,
     maxFiles: 1,
     onDrop: acceptedFiles => {
-      console.log(acceptedFiles[0]);
       if(acceptedFiles[0] && validateImage(acceptedFiles[0])) {
         setImage([URL.createObjectURL(acceptedFiles[0]), acceptedFiles[0]]);
         setCurrentState(1);
@@ -59,6 +59,8 @@ function Home(props) {
 
   const removeFile = () => {
     setImage(["", null]);
+    setFont("");
+    error.current = "";
     setCurrentState(0);
   }
 
@@ -66,94 +68,89 @@ function Home(props) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  function sendImage(event) {
+  function getErrorMessage(error) {
+    return error && error.message ? error.message : "Something went wrong.";
+  }
+
+  async function sendImage(event) {
     event.preventDefault();
     if (!image[1]) {
       return
     }
     let formData = new FormData();
-    var researchOption = document.getElementById("researchOption").checked;
     formData.append("image", image[1]);
-    formData.append("research", researchOption);
-    var response;
-    var status;
+    formData.append("research", false);
     var stat = -1;
     var path;
-    var font_url;
-    setCurrentState(2);
-    fetch(
-      API + "/handwrite/input",
-      {
+    try {
+      setCurrentState(2);
+      if (!API) {
+        throw new Error("Handwrite API URL is not configured.");
+      }
+      var uploadResponse = await fetch(API + "/handwrite/input", {
         method: 'POST',
         body: formData
+      });
+      if (!uploadResponse.ok) {
+        throw new Error("Upload failed with status " + uploadResponse.status + ".");
       }
-    ).then((r) => r.json()).then(async (data) => {
+      var data = await uploadResponse.json();
       const response_code = data.response_code
       const message = data.message
       error.current = message;
-      if (response_code === 1) {
+      if (response_code !== 0) {
+        error.current = message || "Unable to process image.";
         setCurrentState(6);
-        console.log(message)
+        return;
       }
-      else if (response_code === 2) {
-        setCurrentState(6);
-        console.log(message)
-      }
-      else if (response_code === 3) {
-        setCurrentState(6);
-        console.log(message)
-      }
-      else if (response_code === 0) {
-        setCurrentState(3);
-        path = data.path;
-        for (let i = 0; i < 10; i++) {
-          response = await fetch(API + "/handwrite/status/" + path);
-          status = await response.json();
-          const status_response = status.status;
-          console.log(status_response);
-          if (status_response === 0) {
-            console.log("Font file ready!");
-            stat = 0;
-            setCurrentState(4);
-          }
-          else if (status_response === 1) {
-            console.log("Still Processing!");
-            stat = -1;
-          }
-          else if (status_response === 2) {
-            console.log("Unable to Process!");
-            stat = 2;
-            error.current = "Unable to Process!";
-            setCurrentState(6);
-          }
-          else if (status_response === 3) {
-            console.log("Not Found!");
-            stat = 3;
-            error.current = "Not Found!";
-            setCurrentState(6);
-          }
-          await sleep(5000);
-          if (stat !== -1) {
-            break;
-          }
+      setCurrentState(3);
+      path = data.path;
+      for (let i = 0; i < 10; i++) {
+        var response = await fetch(API + "/handwrite/status/" + path);
+        if (!response.ok) {
+          throw new Error("Status check failed with status " + response.status + ".");
         }
+        var status = await response.json();
+        const status_response = status.status;
+        if (status_response === 0) {
+          stat = 0;
+          setCurrentState(4);
+        }
+        else if (status_response === 1) {
+          stat = -1;
+        }
+        else if (status_response === 2) {
+          stat = 2;
+          error.current = "Unable to Process!";
+        }
+        else if (status_response === 3) {
+          stat = 3;
+          error.current = "Not Found!";
+        }
+        if (stat !== -1) {
+          break;
+        }
+        await sleep(5000);
       }
-    }).then(() => {
-      if (stat === 0) {
-        fetch(
-          API + "/handwrite/fetch/" + path,
-          {
-            method: 'POST'
-          }
-        ).then((r) => r.blob()).then(data => {
-          console.log(data);
-          font_url = URL.createObjectURL(data);
-          console.log(font_url);
-          setFont(font_url);
-          setCurrentState(5);
-        });
+      if (stat !== 0) {
+        error.current = error.current || "Timed out waiting for your font.";
+        setCurrentState(6);
+        return;
       }
-    });
+      var fontResponse = await fetch(API + "/handwrite/fetch/" + path, {
+        method: 'POST'
+      });
+      if (!fontResponse.ok) {
+        throw new Error("Font fetch failed with status " + fontResponse.status + ".");
+      }
+      var fontBlob = await fontResponse.blob();
+      setFont(URL.createObjectURL(fontBlob));
+      setCurrentState(5);
+    }
+    catch (e) {
+      error.current = getErrorMessage(e);
+      setCurrentState(6);
+    }
   }
 
   function loading() {
@@ -167,7 +164,7 @@ function Home(props) {
         <div className="spinner"></div>
       </div>
       <div className="loader" style={{ display: currentState === 6 ? "" : "none" }}>
-        <font color = "red"> {error.current} </font>
+        <span className="error-message"> {error.current} </span>
       </div>
       <div className="grid">
         <form onSubmit={(e) => sendImage(e)}>
@@ -188,22 +185,15 @@ function Home(props) {
                 }
               </div>
               {image[1] ?
-                <center><h6>{image[1].path}<IconButton aria-label="delete" color="secondary" size="small" onClick={removeFile} disabled={loading()}>
+                <center><h6>{image[1].path || image[1].name}<IconButton aria-label="delete" color="secondary" size="small" onClick={removeFile} disabled={loading()}>
                   <HighlightOffOutlined />
                 </IconButton></h6></center> : ""}
             </div>
             <div className="submit-button">
-              <Button variant="outlined" href="https://github.com/builtree/handwrite/raw/dev/handwrite_sample.pdf">Download Sample Form</Button><br /><br />
+              <Button variant="outlined" href="https://github.com/yashlamba/handwrite/raw/dev/handwrite_sample.pdf">Download Sample Form</Button><br /><br />
               <Button type="submit" variant="outlined" disabled={loading() || currentState === 0}>
                 CREATE FONT
               </Button>
-              <br /><br />
-              <div className="form-check">
-                <input className="form-check-input" type="checkbox" id="researchOption" defaultChecked></input>
-                <label className="form-check-label" htmlFor="flexCheckChecked">
-                  Opt-in for research use.
-                </label>
-              </div>
               <br /><br />
               <Button variant="outlined" href={font} download="font.ttf" style={{ display: Boolean(font) ? "" : "none" }}>Download your font</Button>
             </div>
